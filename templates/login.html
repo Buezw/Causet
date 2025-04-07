@@ -1,0 +1,48 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>模拟登录 · 测试接口</title>
+</head>
+<body>
+    <h2>🔐 模拟登录接口</h2>
+
+    <form id="login-form">
+        <label>用户名：</label><br>
+        <input type="text" id="username" required><br><br>
+        <label>密码：</label><br>
+        <input type="password" id="password" required><br><br>
+        <button type="submit">登录</button>
+    </form>
+
+    <p id="result" style="margin-top: 1em;"></p>
+
+    <script>
+        const form = document.getElementById("login-form");
+        const result = document.getElementById("result");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                result.textContent = `✅ 登录成功！user_id: ${data.user_id}`;
+            } else {
+                result.textContent = `❌ 登录失败：${data.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

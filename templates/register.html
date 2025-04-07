@@ -1,0 +1,48 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>模拟注册 · 测试接口</title>
+</head>
+<body>
+    <h2>📝 模拟注册接口</h2>
+
+    <form id="register-form">
+        <label>用户名：</label><br>
+        <input type="text" id="username" required><br><br>
+        <label>密码：</label><br>
+        <input type="password" id="password" required><br><br>
+        <button type="submit">注册</button>
+    </form>
+
+    <p id="result" style="margin-top: 1em;"></p>
+
+    <script>
+        const form = document.getElementById("register-form");
+        const result = document.getElementById("result");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch("/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                result.textContent = `✅ 注册成功！现在你可以去登录了`;
+            } else {
+                result.textContent = `❌ 注册失败：${data.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

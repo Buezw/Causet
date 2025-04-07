@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>📱 iOS 推荐模拟器</title>
+</head>
+<body>
+    <h2>📲 模拟 iOS 请求推荐卡片</h2>
+
+    <label>输入 user_id：</label><br>
+    <input type="number" id="user_id" placeholder="比如 3" /><br><br>
+    <button onclick="fetchRecommend()">获取推荐卡片</button>
+
+    <pre id="result" style="margin-top: 1em; background: #eee; padding: 1em;"></pre>
+
+    <script>
+        async function fetchRecommend() {
+            const uid = document.getElementById("user_id").value;
+            const res = await fetch(`/api/recommend?user_id=${uid}`);
+            const data = await res.json();
+
+            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
