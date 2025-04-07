@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>我的知识主页 · Causet</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 2rem auto;
+            max-width: 800px;
+            padding: 1rem;
+            background: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #222;
+        }
+        .card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .tag {
+            display: inline-block;
+            background: #eef;
+            padding: 0.2rem 0.6rem;
+            margin: 0.2rem 0.2rem 0 0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部欢迎 + 学习记录 -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>👋 你好，{{ user_name }}！</h1>
+            <p>📅 {{ today }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p>🧠 已学：<strong>{{ stats.total }}</strong> 个</p>
+            <p>🔥 连续学习：<strong>{{ stats.streak }}</strong> 天</p>
+        </div>
+    </div>
+
+    <!-- 关注主题模块 -->
+    <div class="card">
+        <h2>🎯 你关注的主题</h2>
+        <div>
+            {% for tag in tags %}
+                <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 今日推荐卡片模块（每条独立卡片） -->
+    <h2>📌 今日推荐知识卡片</h2>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for card in today_cards %}
+            <div class="card">
+                <h3 style="margin-top: 0;">{{ card.title }}</h3>
+                <p style="color: #888; margin: 0.5rem 0;">
+                    {{ card.tags | join(" / ") }}
+                </p>
+                <a href="/card/{{ card.id }}">👉 查看详情</a>
+            </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
