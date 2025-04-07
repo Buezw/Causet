@@ -1,3 +1,4 @@
+<!-- templates/homepage.html -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -42,38 +43,76 @@
     <!-- 顶部欢迎 + 学习记录 -->
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h1>👋 你好，{{ user_name }}！</h1>
-            <p>📅 {{ today }}</p>
+            <h1 id="welcome">👋 你好！</h1>
+            <p id="date"></p>
         </div>
         <div style="text-align: right;">
-            <p>🧠 已学：<strong>{{ stats.total }}</strong> 个</p>
-            <p>🔥 连续学习：<strong>{{ stats.streak }}</strong> 天</p>
+            <p>🧠 已学：<strong id="total">-</strong> 个</p>
+            <p>🔥 连续学习：<strong id="streak">-</strong> 天</p>
         </div>
     </div>
 
     <!-- 关注主题模块 -->
     <div class="card">
         <h2>🎯 你关注的主题</h2>
-        <div>
-            {% for tag in tags %}
-                <span class="tag">{{ tag }}</span>
-            {% endfor %}
-        </div>
+        <div id="tag-list"></div>
     </div>
 
-    <!-- 今日推荐卡片模块（每条独立卡片） -->
+    <!-- 推荐卡片模块 -->
     <h2>📌 今日推荐知识卡片</h2>
-    <div style="display: flex; flex-direction: column; gap: 1rem;">
-        {% for card in today_cards %}
-            <div class="card">
-                <h3 style="margin-top: 0;">{{ card.title }}</h3>
-                <p style="color: #888; margin: 0.5rem 0;">
-                    {{ card.tags | join(" / ") }}
-                </p>
-                <a href="/card/{{ card.id }}">👉 查看详情</a>
-            </div>
-        {% endfor %}
-    </div>
+    <div id="card-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
 
+    <script>
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("⚠️ 未登录，请先登录！");
+            window.location.href = "/login";
+        }
+
+        document.getElementById("date").textContent = "📅 " + new Date().toLocaleDateString();
+
+        async function loadHomeData() {
+            const res = await fetch("/api/recommend", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) {
+                alert("❌ 推荐加载失败，可能未登录或 token 过期");
+                return;
+            }
+
+            const data = await res.json();
+
+            // 模拟顶部信息（后续可从接口返回）
+            document.getElementById("welcome").textContent = "👋 你好，" + data.username + "！";
+            document.getElementById("total").textContent = 3 + Math.floor(Math.random() * 20); // 随机
+            document.getElementById("streak").textContent = 1 + Math.floor(Math.random() * 7);
+
+            // 标签区域
+            const tags = [...new Set(data.cards.map(c => c.category))];
+            const tagList = document.getElementById("tag-list");
+            tags.forEach(t => {
+                const tag = document.createElement("span");
+                tag.className = "tag";
+                tag.textContent = t;
+                tagList.appendChild(tag);
+            });
+
+            // 推荐卡片
+            const container = document.getElementById("card-container");
+            data.cards.forEach(card => {
+                const div = document.createElement("div");
+                div.className = "card";
+                div.innerHTML = `
+                    <h3 style="margin-top: 0;">${card.title}</h3>
+                    <p style="color: #888; margin: 0.5rem 0;">${card.category}</p>
+                    <a href="/card/${card.id}">👉 查看详情</a>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        loadHomeData();
+    </script>
 </body>
 </html>

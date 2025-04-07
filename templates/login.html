@@ -3,10 +3,10 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>模拟登录 · 测试接口</title>
+    <title>模拟登录 · JWT 测试</title>
 </head>
 <body>
-    <h2>🔐 模拟登录接口</h2>
+    <h2>🔐 用户登录</h2>
 
     <form id="login-form">
         <label>用户名：</label><br>
@@ -30,17 +30,20 @@
 
             const response = await fetch("/api/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
             });
 
             const data = await response.json();
-            if (data.success) {
-                result.textContent = `✅ 登录成功！user_id: ${data.user_id}`;
+
+            if (data.success && data.token) {
+                localStorage.setItem("token", data.token);  // ✅ 保存 token
+                result.textContent = "✅ 登录成功，跳转中...";
+                setTimeout(() => {
+                    window.location.href = "/";  // ✅ 跳转首页
+                }, 800);
             } else {
-                result.textContent = `❌ 登录失败：${data.message}`;
+                result.textContent = `❌ 登录失败：${data.message || "未知错误"}`;
             }
         });
     </script>
