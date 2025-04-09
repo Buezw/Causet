@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>关注主题偏好设置 · Causet</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 2rem auto;
+            max-width: 600px;
+            padding: 1rem;
+            background: #f7f7f7;
+            color: #333;
+        }
+        h2 {
+            color: #222;
+        }
+        .tag-checkbox {
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h2>选择你感兴趣的主题</h2>
+    <form id="preferences-form"></form>
+
+    <script>
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("⚠️ 未登录，请先登录！");
+            window.location.href = "/login";
+        }
+
+        async function loadPreferences() {
+            // 获取用户偏好
+            const prefRes = await fetch("/api/preferences", {
+                headers: { Authorization: "Bearer " + token }
+            });
+            const userPrefs = (await prefRes.json()).preferences;
+
+            // 获取全部分类
+            const catRes = await fetch("/api/categories");
+            const allCategories = await catRes.json();
+
+            const form = document.getElementById("preferences-form");
+            form.innerHTML = "";
+
+            allCategories.forEach(cat => {
+                const isChecked = userPrefs.includes(cat);
+                form.innerHTML += `
+                    <label class="tag-checkbox">
+                        <input type="checkbox" value="${cat}" ${isChecked ? "checked" : ""}>
+                        ${cat}
+                    </label>
+                `;
+            });
+
+            form.innerHTML += `<button type="submit">保存偏好</button>`;
+        }
+
+        document.getElementById("preferences-form").addEventListener("submit", async e => {
+            e.preventDefault();
+            const selected = Array.from(document.querySelectorAll("input:checked")).map(cb => cb.value);
+            await fetch("/api/preferences", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(selected)
+            });
+            alert("保存成功！");
+        });
+
+        loadPreferences();
+    </script>
+</body>
+</html>

@@ -1,4 +1,3 @@
-<!-- templates/homepage.html -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -68,6 +67,7 @@
     <div class="card">
         <h2>🎯 你关注的主题</h2>
         <div id="tag-list"></div>
+        <p><a href="/preferences">⚙️ 修改兴趣偏好</a></p>
     </div>
 
     <!-- 推荐卡片模块 -->
@@ -96,19 +96,29 @@
             const data = await res.json();
 
             document.getElementById("welcome").textContent = "👋 你好，" + (data.username || "用户") + "！";
-            document.getElementById("total").textContent = 3 + Math.floor(Math.random() * 20);
-            document.getElementById("streak").textContent = 1 + Math.floor(Math.random() * 7);
+            document.getElementById("total").textContent = data.learned_count || 0;
+            document.getElementById("streak").textContent = data.streak_days || 0;
 
-            const tags = [...new Set(data.cards.map(c => c.category))];
             const tagList = document.getElementById("tag-list");
-            tags.forEach(t => {
-                const tag = document.createElement("span");
-                tag.className = "tag";
-                tag.textContent = t;
-                tagList.appendChild(tag);
-            });
+            const preferred = data.cards.map(c => c.category);
+            const uniqueTags = [...new Set(preferred)];
+            if (uniqueTags.length === 0) {
+                tagList.innerHTML = "<p>暂无推荐，请先设置你的兴趣主题。</p>";
+            } else {
+                uniqueTags.forEach(t => {
+                    const tag = document.createElement("span");
+                    tag.className = "tag";
+                    tag.textContent = t;
+                    tagList.appendChild(tag);
+                });
+            }
 
             const container = document.getElementById("card-container");
+            if (data.cards.length === 0) {
+                container.innerHTML = "<p>暂无推荐卡片，已全部学完或请设置偏好。</p>";
+                return;
+            }
+
             data.cards.forEach(card => {
                 const div = document.createElement("div");
                 div.className = "card";

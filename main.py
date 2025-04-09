@@ -9,6 +9,7 @@ from routes.cards import router as cards_router
 from routes.recommend import router as recommend_router
 from routes.learn import router as learn_router
 from watch_cards import start_watch_cards
+from routes import preferences
 
 
 app = FastAPI()
@@ -34,7 +35,7 @@ app.include_router(auth_router)
 app.include_router(cards_router)
 app.include_router(recommend_router)
 app.include_router(learn_router)
-
+app.include_router(preferences.router)
 
 if __name__ == "__main__":
     # ✅ 启动后台监听线程
