@@ -36,6 +36,18 @@
             border-radius: 6px;
             font-size: 0.9rem;
         }
+        button {
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3e8e41;
+        }
     </style>
 </head>
 <body>
@@ -83,12 +95,10 @@
 
             const data = await res.json();
 
-            // 模拟顶部信息（后续可从接口返回）
-            document.getElementById("welcome").textContent = "👋 你好，" + data.username + "！";
-            document.getElementById("total").textContent = 3 + Math.floor(Math.random() * 20); // 随机
+            document.getElementById("welcome").textContent = "👋 你好，" + (data.username || "用户") + "！";
+            document.getElementById("total").textContent = 3 + Math.floor(Math.random() * 20);
             document.getElementById("streak").textContent = 1 + Math.floor(Math.random() * 7);
 
-            // 标签区域
             const tags = [...new Set(data.cards.map(c => c.category))];
             const tagList = document.getElementById("tag-list");
             tags.forEach(t => {
@@ -98,7 +108,6 @@
                 tagList.appendChild(tag);
             });
 
-            // 推荐卡片
             const container = document.getElementById("card-container");
             data.cards.forEach(card => {
                 const div = document.createElement("div");
@@ -106,10 +115,30 @@
                 div.innerHTML = `
                     <h3 style="margin-top: 0;">${card.title}</h3>
                     <p style="color: #888; margin: 0.5rem 0;">${card.category}</p>
-                    <a href="/card/${card.id}">👉 查看详情</a>
+                    <a href="/card/${card.id}">👉 查看详情</a><br>
+                    <button onclick="markAsLearned(${card.id})">✅ 完成学习</button>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        async function markAsLearned(cardId) {
+            const res = await fetch("/api/learn", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ card_id: cardId })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert("✅ 学习记录已保存！");
+                location.reload();
+            } else {
+                alert("❌ 保存失败：" + (data.message || "未知错误"));
+            }
         }
 
         loadHomeData();

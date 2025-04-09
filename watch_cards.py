@@ -14,21 +14,21 @@ Session = sessionmaker(bind=engine)
 
 class Card(Base):
     __tablename__ = "cards"
+
     id = Column(Integer, primary_key=True)
-    title = Column(String, nullable=False)             # 文件标题（不含扩展名）
-    category = Column(String, nullable=False)          # 上级目录名作为分类
-    path = Column(String, nullable=False, unique=True) # 相对路径，如 cards/physic/牛顿第二定律.md
-    is_active = Column(Boolean, default=True)          # 是否推荐/启用
-    last_modified = Column(DateTime, nullable=False)   # 文件最后修改时间（mtime）
+    title = Column(String, nullable=False)
+    category = Column(String, nullable=False)
+    path = Column(String, nullable=False, unique=True)
+    is_active = Column(Boolean, default=True)
+    last_modified = Column(DateTime, nullable=False)
+    order_in_category = Column(Integer, nullable=True)  # ✅ 别忘了这个
+  # 文件最后修改时间（mtime）
 
 # 初始化数据库表
 Base.metadata.create_all(engine)
 
 # === 同步函数：更新或创建卡片记录 ===
 def sync_single_card(file_path: str):
-    """
-    将某个 Markdown 文件同步进数据库，若已存在则更新其修改时间等信息
-    """
     path_obj = Path(file_path)
     if not path_obj.suffix == ".md":
         return
@@ -48,18 +48,24 @@ def sync_single_card(file_path: str):
         existing.is_active = True
         print(f"📝 更新卡片：{title}")
     else:
+        # ✅ 只有在新增卡片时才需要分配顺序编号
+        existing_cards = session.query(Card).filter_by(category=category).all()
+        order = len(existing_cards) + 1
+
         new_card = Card(
             title=title,
             category=category,
             path=rel_path,
             last_modified=last_modified,
-            is_active=True
+            is_active=True,
+            order_in_category=order  # ✅ 加上顺序
         )
         session.add(new_card)
-        print(f"➕ 新增卡片：{title}")
+        print(f"➕ 新增卡片：{title}（顺序：{order}）")
 
     session.commit()
     session.close()
+
 
 # === 删除函数 ===
 def remove_card_by_path(file_path: str):
@@ -106,5 +112,5 @@ def start_watch_cards():
         observer.stop()
     observer.join()
 
-# === 启动程序 ===
-start_watch_cards()
+if __name__ == "__main__":
+    start_watch_cards()
