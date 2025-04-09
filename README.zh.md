@@ -94,7 +94,7 @@ pip install -r requirements.txt
 
 1. **克隆本项目**  
    ```bash
-   git clone https://github.com/xxx/Causet.git
+   git clone https://github.com/buezw/Causet.git
    cd Causet
    ```
 
